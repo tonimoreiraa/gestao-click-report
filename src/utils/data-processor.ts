@@ -31,8 +31,12 @@ export function enrichPayments(
     payments: Payment[],
     serviceOrders: ServiceOrder[],
     sales: Sale[]
-): EnrichedPayment[] {
+): {
+    enrichedPayments: EnrichedPayment[];
+    headers: string[]
+} {
     // Create indices for efficient lookup
+    var headers: string[] = Object.keys(payments[0])
     const serviceOrdersByCode = new Map<string, ServiceOrder>();
     for (const so of serviceOrders) {
         serviceOrdersByCode.set(so.codigo, so);
@@ -43,9 +47,12 @@ export function enrichPayments(
         salesByCode.set(sale.codigo, sale);
     }
 
+    let firstSale = true;
+    let firstServiceOrder = true;
+
     // Process each payment
-    return payments.map(payment => {
-        const result: EnrichedPayment = { ...payment };
+    const enrichedPayments = payments.map(payment => {
+        let result: EnrichedPayment = { ...payment };
 
         // Extract reference number from description
         const { type, number } = extractReferenceNumber(payment.descricao);
@@ -55,16 +62,22 @@ export function enrichPayments(
             result.relationship_type = type;
 
             if (type === 'sale') {
+                firstSale = false;
                 const relatedSale = salesByCode.get(String(number));
-                console.log(relatedSale)
                 if (relatedSale) {
-                    result.related_sale = relatedSale;
+                    result = { ...result, ...relatedSale };
+                    if (firstSale) {
+                        headers.push(...Object.keys(result))
+                    }
                 }
             } else if (type === 'service_order') {
+                firstServiceOrder = true;
                 const relatedServiceOrder = serviceOrdersByCode.get(String(number));
-                console.log(relatedServiceOrder)
                 if (relatedServiceOrder) {
-                    result.related_service_order = relatedServiceOrder;
+                    result = { ...result, ...relatedServiceOrder };
+                    if (firstServiceOrder) {
+                        headers.push(...Object.keys(result))
+                    }
                 }
             }
 
@@ -74,4 +87,9 @@ export function enrichPayments(
 
         return result;
     });
+
+    // Remove duplicates from headers
+    headers = headers.filter((value, index, self) => self.indexOf(value) === index);
+
+    return { enrichedPayments, headers }
 }

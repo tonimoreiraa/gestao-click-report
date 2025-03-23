@@ -1,32 +1,11 @@
-// main.ts - Main application file
 import dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
 import { getPayments, getServiceOrders, getSales } from './api/methods';
 import { enrichPayments } from './utils/data-processor';
 import { EnrichedPayment } from './api/types';
+import { GoogleSheetsExport } from './utils/google-sheets';
 
 // Load environment variables from .env file
 dotenv.config();
-
-/**
- * Save data to JSON file
- */
-function saveToJson(data: any, filename: string): void {
-    try {
-        // Create output directory if it doesn't exist
-        const outputDir = path.resolve(__dirname, 'output');
-        if (!fs.existsSync(outputDir)) {
-            fs.mkdirSync(outputDir, { recursive: true });
-        }
-
-        const filePath = path.join(outputDir, filename);
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-        console.log(`Successfully saved data to ${filePath}`);
-    } catch (error) {
-        console.error('Error saving data to file:', error instanceof Error ? error.message : String(error));
-    }
-}
 
 /**
  * Generate simple report from the enriched payments
@@ -66,10 +45,20 @@ async function main() {
 
         // Enrich payments with related data
         console.log('Processing payment relationships...');
-        const enrichedPayments = enrichPayments(payments, serviceOrders, sales);
+        const {
+            enrichedPayments,
+            headers
+        } = enrichPayments(payments, serviceOrders, sales);
+        console.log(headers)
 
-        // Save results to file
-        saveToJson(enrichedPayments, 'enriched_payments.json');
+
+        const exporter = new GoogleSheetsExport();
+        await exporter.exportJson(
+            enrichedPayments,
+            process.env.SPREADSHEET_ID as string,
+            'Novo',
+            headers,
+        );
 
         // Generate report
         generateReport(enrichedPayments);

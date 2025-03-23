@@ -15,7 +15,6 @@ export interface Payment {
 }
 
 export interface EnrichedPayment extends Payment {
-    related_sale?: Sale;
-    related_service_order?: ServiceOrder;
     relationship_type?: 'sale' | 'service_order' | 'other';
+    [key: string]: any;
 }

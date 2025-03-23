@@ -136,3 +136,5 @@ dist
 .pnp.*
 
 .env
+
+credentials.json
