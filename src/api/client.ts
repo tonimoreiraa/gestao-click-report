@@ -40,6 +40,16 @@ export async function fetchAllPages<T>(
             // Check if data.data is a string (probably error)
             if (typeof response.data.data === 'string') {
                 console.warn(`Warning: Invalid response from endpoint ${url}. Retrying.`);
+                if (response.data.data == 'Não há dados!') {
+                    console.warn(`Warning: No data available from endpoint ${url}.`);
+                    return {
+                        ...response,
+                        data: {
+                            data: [],
+                            meta: {}
+                        }
+                    } as ApiResponse<T>;
+                }
                 if (remainingRetries > 0) {
                     await delay(delayBetweenRetries);
                     return fetchWithRetry(url, remainingRetries - 1);
@@ -94,6 +104,7 @@ export async function fetchAllPages<T>(
 
         // Load additional pages while there is a proxima_url
         while (response.data.meta && response.data.meta.proxima_url) {
+            console.log(response.data.meta)
             try {
                 // Small pause to not overload the API
                 await delay(500);
@@ -113,7 +124,6 @@ export async function fetchAllPages<T>(
         }
 
         // @ts-ignore
-        console.log(Object.keys(allData[0]))
         console.log(`Loaded ${allData.length} records from endpoint ${endpoint}`);
         return allData;
     } catch (error) {

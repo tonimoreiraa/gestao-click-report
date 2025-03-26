@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { getPayments, getServiceOrders, getSales } from './api/methods';
+import { getPayments, getServiceOrders, getSales, getStores } from './api/methods';
 import { enrichPayments } from './utils/data-processor';
 import { EnrichedPayment } from './api/types';
 import { GoogleSheetsExport } from './utils/google-sheets';
@@ -33,9 +33,11 @@ async function main() {
     try {
         console.log('Starting data processing from Gestão Click API...');
 
-        const payments = await getPayments()
-        const serviceOrders = await getServiceOrders()
-        const sales = await getSales()
+        const stores = await getStores()
+
+        const payments = await getPayments(stores)
+        const serviceOrders = await getServiceOrders(stores)
+        const sales = await getSales(stores)
 
         // Handle empty data
         if (payments.length === 0) {
@@ -54,7 +56,7 @@ async function main() {
         await exporter.exportJson(
             enrichedPayments,
             process.env.SPREADSHEET_ID as string,
-            'Novo',
+            'VENDAS COM FINANCEIRO',
             headers,
         );
 

@@ -39,12 +39,13 @@ export function enrichPayments(
     var headers: string[] = Object.keys(payments[0])
     const serviceOrdersByCode = new Map<string, ServiceOrder>();
     for (const so of serviceOrders) {
-        serviceOrdersByCode.set(so.codigo, so);
+        console.log(so.os_codigo)
+        serviceOrdersByCode.set(so.os_codigo, so);
     }
 
     const salesByCode = new Map<string, Sale>();
     for (const sale of sales) {
-        salesByCode.set(sale.codigo, sale);
+        salesByCode.set(sale.venda_codigo, sale);
     }
 
     let firstSale = true;
@@ -62,21 +63,21 @@ export function enrichPayments(
             result.relationship_type = type;
 
             if (type === 'sale') {
-                firstSale = false;
                 const relatedSale = salesByCode.get(String(number));
                 if (relatedSale) {
                     result = { ...result, ...relatedSale };
-                    if (firstSale) {
+                    if (firstSale && relatedSale) {
                         headers.push(...Object.keys(result))
+                        firstSale = false;
                     }
                 }
             } else if (type === 'service_order') {
-                firstServiceOrder = true;
                 const relatedServiceOrder = serviceOrdersByCode.get(String(number));
                 if (relatedServiceOrder) {
                     result = { ...result, ...relatedServiceOrder };
-                    if (firstServiceOrder) {
+                    if (firstServiceOrder && relatedServiceOrder) {
                         headers.push(...Object.keys(result))
+                        firstServiceOrder = false;
                     }
                 }
             }
