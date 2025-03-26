@@ -37,7 +37,6 @@ export async function fetchAllPages<T>(
             if (!response || !response.data) {
                 throw new Error('Invalid response');
             }
-
             // Check if data.data is a string (probably error)
             if (typeof response.data.data === 'string') {
                 console.warn(`Warning: Invalid response from endpoint ${url}. Retrying.`);
@@ -113,6 +112,8 @@ export async function fetchAllPages<T>(
             }
         }
 
+        // @ts-ignore
+        console.log(Object.keys(allData[0]))
         console.log(`Loaded ${allData.length} records from endpoint ${endpoint}`);
         return allData;
     } catch (error) {

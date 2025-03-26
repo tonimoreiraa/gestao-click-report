@@ -49,8 +49,6 @@ async function main() {
             enrichedPayments,
             headers
         } = enrichPayments(payments, serviceOrders, sales);
-        console.log(headers)
-
 
         const exporter = new GoogleSheetsExport();
         await exporter.exportJson(
