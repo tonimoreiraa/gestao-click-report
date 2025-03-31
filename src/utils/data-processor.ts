@@ -48,15 +48,15 @@ export function enrichPayments(
 
     // Filter only payed sales
     sales = sales.filter(sale => {
-        return sale.situacao_financeiro != 1
+        return sale.situacao_financeiro == 1
             && !(sale.pagamentos && sale.pagamentos[0] && sale.pagamentos[0].pagamento.nome_forma_pagamento == 'A Combinar')
-            && allowedIDs.includes(`sale-${sale.venda_codigo}`)
+            && allowedIDs.includes(`sale-${sale.codigo}`)
     })
 
     serviceOrders = serviceOrders.filter(os => {
         return os.situacao_financeiro != 1
             && !(os.pagamentos && os.pagamentos[0] && os.pagamentos[0].pagamento.nome_forma_pagamento == 'A Combinar')
-            && allowedIDs.includes(`service_order-${os.os_codigo}`)
+            && allowedIDs.includes(`service_order-${os.codigo}`)
     })
 
     const headers = [
@@ -74,7 +74,7 @@ export function enrichPayments(
         const seller = users.find(user => user.id == sale.vendedor_id) as User
 
         // Produtos de uma venda
-        for (const row of sale.produtos) {
+        for (const row of sale.produtos ?? []) {
             const product = row.produto
             var productTotal = Number(product.valor_total)
             if (productTotal > saleTotalPrice) {
@@ -86,13 +86,13 @@ export function enrichPayments(
                 'Loja': sale.nome_loja,
                 'Ano': sale.data.split('-')[0],
                 'Mês': sale.data.split('-')[1],
-                'Usuário': seller,
+                'Usuário': seller ? seller.nome : sale.vendedor_id,
                 'Valor total': productTotal,
                 'Quantidade': product.quantidade,
                 'Item': group ? group.nome : 'Sem grupo',
                 'Tipo de item': 'Grupo de produto ' + (group && group.grupo_pai_id.length ? '(SG)' : '(PAI)'),
                 'Fonte': 'Venda de produto',
-                'ID da Fonte': sale.venda_codigo,
+                'ID da Fonte': sale.codigo,
                 'Produto': product.nome_produto,
                 'Técnico': sale.tecnico_id,
                 'Data de entrada': '', // data entrada nao tem pq nao é OS
@@ -101,17 +101,17 @@ export function enrichPayments(
         }
 
         // Serviços de uma venda
-        for (const row of sale.servicos) {
+        for (const row of sale.servicos ?? []) {
             const service = row.servico
             var serviceTotal = Number(service.valor_total)
             if (serviceTotal > saleTotalPrice) {
                 serviceTotal = saleTotalPrice
             }
-            const sellers = [`${seller.nome} (${seller.id})`]
+            const sellers = [`${seller?.nome} (${seller?.id})`]
 
             users.forEach(user => {
                 if (sale.observacoes_interna.includes(user.id)) {
-                    sellers.push(`${user.nome} (${user.id})`)
+                    sellers.push(`${user?.nome} (${user?.id})`)
                 }
             })
             for (const seller of sellers) {
@@ -126,7 +126,7 @@ export function enrichPayments(
                     'Item': service.nome_servico,
                     'Tipo de item': 'Serviço',
                     'Fonte': 'Venda de produto',
-                    'ID da Fonte': sale.venda_codigo,
+                    'ID da Fonte': sale.codigo,
                     'Produto': '',
                     'Técnico': sale.tecnico_id,
                     'Data de entrada': '', // data entrada nao tem pq nao é OS
@@ -146,7 +146,7 @@ export function enrichPayments(
         const seller = users.find(user => user.id == sale.vendedor_id) as User
 
         // Produtos de uma venda
-        for (const row of sale.produtos) {
+        for (const row of sale.produtos ?? []) {
             const product = row.produto
             var productTotal = Number(product.valor_total)
             if (productTotal > saleTotalPrice) {
@@ -158,13 +158,13 @@ export function enrichPayments(
                 'Loja': sale.nome_loja,
                 'Ano': sale.data.split('-')[0],
                 'Mês': sale.data.split('-')[1],
-                'Usuário': seller,
+                'Usuário': seller.nome,
                 'Valor total': productTotal,
                 'Quantidade': product.quantidade,
                 'Item': group ? group.nome : 'Sem grupo',
                 'Tipo de item': 'Grupo de produto ' + (group && group.grupo_pai_id.length ? '(SG)' : '(PAI)'),
                 'Fonte': 'Serviço',
-                'ID da Fonte': sale.venda_codigo,
+                'ID da Fonte': sale.codigo,
                 'Produto': product.nome_produto,
                 'Técnico': sale.tecnico_id,
                 'Data de entrada': '',
@@ -173,17 +173,17 @@ export function enrichPayments(
         }
 
         // Serviços de uma venda
-        for (const row of sale.servicos) {
+        for (const row of sale.servicos ?? []) {
             const service = row.servico
             var serviceTotal = Number(service.valor_total)
             if (serviceTotal > saleTotalPrice) {
                 serviceTotal = saleTotalPrice
             }
-            const sellers = [`${seller.nome} (${seller.id})`]
+            const sellers = [`${seller?.nome} (${seller?.id})`]
 
             users.forEach(user => {
                 if (sale.observacoes_interna.includes(user.id)) {
-                    sellers.push(`${user.nome} (${user.id})`)
+                    sellers.push(`${user?.nome} (${user?.id})`)
                 }
             })
             for (const seller of sellers) {
@@ -198,7 +198,7 @@ export function enrichPayments(
                     'Item': service.nome_servico,
                     'Tipo de item': 'Serviço',
                     'Fonte': 'Serviço',
-                    'ID da Fonte': sale.venda_codigo,
+                    'ID da Fonte': sale.codigo,
                     'Produto': '',
                     'Técnico': sale.tecnico_id,
                     'Data de entrada': sale.data_entrada,

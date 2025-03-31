@@ -11,19 +11,7 @@ dotenv.config();
  * Generate simple report from the enriched payments
  */
 function generateReport(enrichedPayments: EnrichedPayment[]): void {
-    const totalPayments = enrichedPayments.length;
-    const paymentsBySale = enrichedPayments.filter(p => p.relationship_type === 'sale').length;
-    const paymentsByServiceOrder = enrichedPayments.filter(p => p.relationship_type === 'service_order').length;
-    const otherPayments = enrichedPayments.filter(p => p.relationship_type === 'other').length;
 
-    console.log(`
-===== Processing Report =====
-Total payments processed: ${totalPayments}
-Payments related to sales: ${paymentsBySale} (${(paymentsBySale / totalPayments * 100).toFixed(2)}%)
-Payments related to service orders: ${paymentsByServiceOrder} (${(paymentsByServiceOrder / totalPayments * 100).toFixed(2)}%)
-Payments with custom description: ${otherPayments} (${(otherPayments / totalPayments * 100).toFixed(2)}%)
-============================
-  `);
 }
 
 /**
@@ -35,11 +23,11 @@ async function main() {
 
         const stores = await getStores()
 
+        const products = await getProducts()
+        const productGroups = await getProductGroups()
         const payments = await getPayments(stores)
         const serviceOrders = await getServiceOrders(stores)
         const sales = await getSales(stores)
-        const products = await getProducts()
-        const productGroups = await getProductGroups()
         const users = await getUsers()
 
 

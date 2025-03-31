@@ -138,3 +138,10 @@ dist
 .env
 
 credentials.json
+
+payments.json
+product-groups.json
+products.json
+sales.json
+service-orders.json
+users.json
