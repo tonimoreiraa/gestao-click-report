@@ -1,6 +1,6 @@
 // payment-loader.ts
 import { fetchAllPages } from './client';
-import { Payment, Sale, ServiceOrder, Store } from './types';
+import { Payment, Product, ProductGroup, Sale, ServiceOrder, Store, User } from './types';
 
 /**
  * Load all stores from the API
@@ -26,7 +26,7 @@ export async function getPayments(stores: Store[]): Promise<Payment[]> {
   const today = new Date().toISOString().split('T')[0]
 
   try {
-    const payments = await fetchAllPages<Payment>('/recebimentos?data_inicio=2025-03-01&data_fim=' + today);
+    const payments = await fetchAllPages<Payment>('/recebimentos?data_inicio=2023-01-01&data_fim=' + today);
     console.log(`Successfully loaded ${payments.length} payments`);
     return payments;
   } catch (error) {
@@ -35,6 +35,53 @@ export async function getPayments(stores: Store[]): Promise<Payment[]> {
     return [];
   }
 }
+/**
+ * Load all product groups from the API
+ */
+export async function getProductGroups(): Promise<ProductGroup[]> {
+  console.log('Loading product groups...');
+  try {
+    const groups = await fetchAllPages<ProductGroup>('/grupos_produtos');
+    console.log(`Successfully loaded ${groups.length} product groups`);
+    return groups;
+  } catch (error) {
+    console.error('Error loading product groups:', error instanceof Error ? error.message : String(error));
+    // Return empty array in case of error to allow the application to continue
+    return [];
+  }
+}
+
+/**
+ * Load all products from the API
+ */
+export async function getProducts(): Promise<Product[]> {
+  console.log('Loading products...');
+  try {
+    const products = await fetchAllPages<Product>('/produtos');
+    console.log(`Successfully loaded ${products.length} products`);
+    return products;
+  } catch (error) {
+    console.error('Error loading products:', error instanceof Error ? error.message : String(error));
+    // Return empty array in case of error to allow the application to continue
+    return [];
+  }
+}
+
+/**
+ * Load all users from the API
+ */
+export async function getUsers(): Promise<User[]> {
+  console.log('Loading users...');
+  try {
+    const users = await fetchAllPages<User>('/usuarios');
+    console.log(`Successfully loaded ${users.length} users`);
+    return users;
+  } catch (error) {
+    console.error('Error loading users:', error instanceof Error ? error.message : String(error));
+    return [];
+  }
+}
+
 /**
  * Load all service orders from the API
  */
@@ -45,7 +92,7 @@ export async function getServiceOrders(stores: Store[]): Promise<ServiceOrder[]>
   let serviceOrders: ServiceOrder[] = []
   try {
     for (const store of stores) {
-      let currentStoreOS = await fetchAllPages<ServiceOrder>(`/ordens_servicos?data_inicio=2024-01-01&data_fim=${today}&loja_id=${store.id}`);
+      let currentStoreOS = await fetchAllPages<ServiceOrder>(`/ordens_servicos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
       serviceOrders = [...serviceOrders, ...currentStoreOS]
     }
     const prefixedServiceOrders = serviceOrders.map(order => {
@@ -72,8 +119,8 @@ export async function getSales(stores: Store[]): Promise<Sale[]> {
   try {
     const today = new Date().toISOString().split('T')[0]
     for (const store of stores) {
-      const normalSales = await fetchAllPages<Sale>(`/vendas?data_inicio=2025-03-01&data_fim=${today}&loja_id=${store.id}`);
-      const counterSales = await fetchAllPages<Sale>(`/vendas?tipo=vendas_balcao&data_inicio=2025-03-01&data_fim=${today}&loja_id=${store.id}`)
+      const normalSales = await fetchAllPages<Sale>(`/vendas?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
+      const counterSales = await fetchAllPages<Sale>(`/vendas?tipo=vendas_balcao&data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`)
       sales = [...sales, ...normalSales, ...counterSales];
     }
 

@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { getPayments, getServiceOrders, getSales, getStores } from './api/methods';
+import { getPayments, getServiceOrders, getSales, getStores, getProducts, getUsers, getProductGroups } from './api/methods';
 import { enrichPayments } from './utils/data-processor';
 import { EnrichedPayment } from './api/types';
 import { GoogleSheetsExport } from './utils/google-sheets';
@@ -38,6 +38,10 @@ async function main() {
         const payments = await getPayments(stores)
         const serviceOrders = await getServiceOrders(stores)
         const sales = await getSales(stores)
+        const products = await getProducts()
+        const productGroups = await getProductGroups()
+        const users = await getUsers()
+
 
         // Handle empty data
         if (payments.length === 0) {
@@ -50,7 +54,7 @@ async function main() {
         const {
             enrichedPayments,
             headers
-        } = enrichPayments(payments, serviceOrders, sales);
+        } = enrichPayments(payments, serviceOrders, sales, users, productGroups, products);
 
         const exporter = new GoogleSheetsExport();
         await exporter.exportJson(
