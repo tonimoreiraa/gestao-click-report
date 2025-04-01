@@ -28,7 +28,6 @@ export class GoogleSheetsExport {
     // Get the number of rows and columns in the data array
     const numRows = dataArray.length;
     const numCols = headers.length;
-    console.log(numRows, numCols);
 
     // Calculate the ending column letter based on the number of columns
     let endingColLetter = "";

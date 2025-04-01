@@ -46,15 +46,17 @@ export function enrichPayments(
         return acc;
     }, []);
 
+
     // Filter only payed sales
     sales = sales.filter(sale => {
         return sale.situacao_financeiro == 1
-            && !(sale.pagamentos && sale.pagamentos[0] && sale.pagamentos[0].pagamento.nome_forma_pagamento == 'A Combinar')
-            && allowedIDs.includes(`sale-${sale.codigo}`)
+        && !(sale.pagamentos && sale.pagamentos[0] && sale.pagamentos[0].pagamento.nome_forma_pagamento == 'A Combinar')
+        && allowedIDs.includes(`sale-${sale.codigo}`)
     })
-
+    
+    
     serviceOrders = serviceOrders.filter(os => {
-        return os.situacao_financeiro != 1
+        return os.situacao_financeiro == 1
             && !(os.pagamentos && os.pagamentos[0] && os.pagamentos[0].pagamento.nome_forma_pagamento == 'A Combinar')
             && allowedIDs.includes(`service_order-${os.codigo}`)
     })
@@ -137,7 +139,6 @@ export function enrichPayments(
     }
 
     for (const sale of serviceOrders) {
-
         let saleTotalPrice = 0;
         if (sale.situacao_financeiro == 1 && sale.pagamentos) {
             saleTotalPrice = sale.pagamentos.reduce((total: number, p: any) => total + Number(p.pagamento.valor), 0)
@@ -156,9 +157,9 @@ export function enrichPayments(
             data.push({
                 'Data': sale.data,
                 'Loja': sale.nome_loja,
-                'Ano': sale.data.split('-')[0],
-                'Mês': sale.data.split('-')[1],
-                'Usuário': seller.nome,
+                'Ano': sale.cadastrado_em.split('-')[0],
+                'Mês': sale.cadastrado_em.split('-')[1],
+                'Usuário': seller ? seller.nome : sale.vendedor_id,
                 'Valor total': productTotal,
                 'Quantidade': product.quantidade,
                 'Item': group ? group.nome : 'Sem grupo',
@@ -190,8 +191,8 @@ export function enrichPayments(
                 data.push({
                     'Data': sale.data,
                     'Loja': sale.nome_loja,
-                    'Ano': sale.data.split('-')[0],
-                    'Mês': sale.data.split('-')[1],
+                    'Ano': sale.cadastrado_em.split('-')[0],
+                    'Mês': sale.cadastrado_em.split('-')[1],
                     'Usuário': seller,
                     'Valor total': serviceTotal / sellers.length,
                     'Quantidade': 1,

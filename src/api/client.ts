@@ -104,7 +104,6 @@ export async function fetchAllPages<T>(
 
         // Load additional pages while there is a proxima_url
         while (response.data.meta && response.data.meta.proxima_url) {
-            console.log(response.data.meta)
             try {
                 // Small pause to not overload the API
                 await delay(500);

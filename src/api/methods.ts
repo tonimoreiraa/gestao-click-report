@@ -1,4 +1,3 @@
-// payment-loader.ts
 import { fetchAllPages } from './client';
 import { Payment, Product, ProductGroup, Sale, ServiceOrder, Store, User } from './types';
 import fs from 'fs/promises'
@@ -8,6 +7,9 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const loadFromCache = NODE_ENV == 'development'
 
 async function isFileNewerThanOneDay(filePath: string): Promise<boolean> {
+  if (NODE_ENV == 'development') {
+    return true;
+  }
   if (!existsSync(filePath)) return false;
   const stats = await fs.stat(filePath);
   const oneDay = 24 * 60 * 60 * 1000; // one day in milliseconds
@@ -38,19 +40,23 @@ export async function getPayments(stores: Store[]): Promise<Payment[]> {
   const today = new Date().toISOString().split('T')[0]
 
   try {
-    let payments;
     const filePath = 'payments.json';
-    if (existsSync(filePath) && await isFileNewerThanOneDay(filePath)) {
+    if (loadFromCache && existsSync(filePath) && await isFileNewerThanOneDay(filePath)) {
       const fileContent = await fs.readFile(filePath, 'utf-8');
-      payments = JSON.parse(fileContent);
-    } else {
-      payments = await fetchAllPages<Payment>('/recebimentos?data_inicio=2023-01-01&data_fim=' + today);
-      await fs.writeFile(filePath, JSON.stringify(payments, null, 2));
+      return JSON.parse(fileContent);
     }
+
+    let payments: Payment[] = []
+    for (const store of stores) {
+      const storePayments = await fetchAllPages<Payment>(`/recebimentos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
+      payments = [...payments, ...storePayments];
+    }
+
+    await fs.writeFile(filePath, JSON.stringify(payments, null, 2));
+    console.log(`Successfully loaded ${payments.length} payments`);
     return payments;
   } catch (error) {
     console.error('Error loading payments:', error instanceof Error ? error.message : String(error));
-    // Return empty array in case of error to allow the application to continue
     return [];
   }
 }
@@ -129,7 +135,7 @@ export async function getUsers(): Promise<User[]> {
 export async function getServiceOrders(stores: Store[]): Promise<ServiceOrder[]> {
   console.log('Loading service orders...');
   const today = new Date().toISOString().split('T')[0]
-
+  const situacaoId = process.env.OS_SITUACAO
   try {
     const filePath = 'service-orders.json';
     if (loadFromCache && existsSync(filePath) && await isFileNewerThanOneDay(filePath)) {
@@ -139,7 +145,7 @@ export async function getServiceOrders(stores: Store[]): Promise<ServiceOrder[]>
 
     let serviceOrders: ServiceOrder[] = []
     for (const store of stores) {
-      let currentStoreOS = await fetchAllPages<ServiceOrder>(`/ordens_servicos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
+      let currentStoreOS = await fetchAllPages<ServiceOrder>(`/ordens_servicos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}&situacao_id=${situacaoId}`);
       serviceOrders = [...serviceOrders, ...currentStoreOS]
     }
 

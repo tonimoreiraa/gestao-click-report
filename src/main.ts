@@ -58,6 +58,7 @@ async function main() {
         console.log('Processing completed successfully!');
     } catch (error) {
         console.error('Error in main process:', error instanceof Error ? error.message : String(error));
+        console.error(error)
         process.exit(1);
     }
 }
