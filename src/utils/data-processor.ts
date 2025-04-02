@@ -155,7 +155,7 @@ export function enrichPayments(
             }
             const group = product.produto_id && productGroups.find(g => g.id == products.find(p => p.id == product.produto_id)?.grupo_id)
             data.push({
-                'Data': sale.data,
+                'Data': sale.cadastrado_em.split(' ')?.[0],
                 'Loja': sale.nome_loja,
                 'Ano': sale.cadastrado_em.split('-')[0],
                 'Mês': sale.cadastrado_em.split('-')[1],
@@ -164,7 +164,7 @@ export function enrichPayments(
                 'Quantidade': product.quantidade,
                 'Item': group ? group.nome : 'Sem grupo',
                 'Tipo de item': 'Grupo de produto ' + (group && group.grupo_pai_id.length ? '(SG)' : '(PAI)'),
-                'Fonte': 'Serviço',
+                'Fonte': 'Ordem de serviço',
                 'ID da Fonte': sale.codigo,
                 'Produto': product.nome_produto,
                 'Técnico': sale.tecnico_id,
@@ -189,7 +189,7 @@ export function enrichPayments(
             })
             for (const seller of sellers) {
                 data.push({
-                    'Data': sale.data,
+                    'Data': sale.cadastrado_em.split(' ')?.[0],
                     'Loja': sale.nome_loja,
                     'Ano': sale.cadastrado_em.split('-')[0],
                     'Mês': sale.cadastrado_em.split('-')[1],
@@ -209,5 +209,5 @@ export function enrichPayments(
         }
     }
 
-    return { enrichedPayments: data, headers }
+    return { enrichedPayments: data.reverse(), headers }
 }
