@@ -38,14 +38,16 @@ export function enrichPayments(
     enrichedPayments: EnrichedPayment[];
     headers: string[]
 } {
+    const dates: Record<string, string> = {}
     const allowedIDs = payments.reduce((acc: string[], payment: Payment) => {
         const reference = extractReferenceNumber(payment.descricao);
         if (reference.number !== null) {
-            acc.push(`${reference.type}-${reference.number}`);
+            const key = `${reference.type}-${reference.number}`
+            acc.push(key);
+            dates[key] = payment.data_liquidacao
         }
         return acc;
     }, []);
-
 
     // Filter only payed sales
     sales = sales.filter(sale => {
@@ -67,7 +69,8 @@ export function enrichPayments(
 
     const data: EnrichedPayment[] = []
     for (const sale of sales) {
-
+        const date = dates[`sale-${sale.codigo}`] as string
+        
         let saleTotalPrice = 0;
         if (sale.situacao_financeiro == 1 && sale.pagamentos) {
             saleTotalPrice = sale.pagamentos.reduce((total: number, p: any) => total + Number(p.pagamento.valor), 0)
@@ -84,10 +87,10 @@ export function enrichPayments(
             }
             const group = product.produto_id && productGroups.find(g => g.id == products.find(p => p.id == product.produto_id)?.grupo_id)
             data.push({
-                'Data': sale.data,
+                'Data': date,
                 'Loja': sale.nome_loja,
-                'Ano': sale.data.split('-')[0],
-                'Mês': sale.data.split('-')[1],
+                'Ano': date.split('-')[0],
+                'Mês': date.split('-')[1],
                 'Usuário': seller ? seller.nome : sale.vendedor_id,
                 'Valor total': productTotal,
                 'Quantidade': product.quantidade,
@@ -118,10 +121,10 @@ export function enrichPayments(
             })
             for (const seller of sellers) {
                 data.push({
-                    'Data': sale.data,
+                    'Data': date,
                     'Loja': sale.nome_loja,
-                    'Ano': sale.data.split('-')[0],
-                    'Mês': sale.data.split('-')[1],
+                    'Ano': date.split('-')[0],
+                    'Mês': date.split('-')[1],
                     'Usuário': seller,
                     'Valor total': serviceTotal / sellers.length,
                     'Quantidade': 1,
@@ -139,6 +142,7 @@ export function enrichPayments(
     }
 
     for (const sale of serviceOrders) {
+        const date = dates[`service_order-${sale.codigo}`]
         let saleTotalPrice = 0;
         if (sale.situacao_financeiro == 1 && sale.pagamentos) {
             saleTotalPrice = sale.pagamentos.reduce((total: number, p: any) => total + Number(p.pagamento.valor), 0)
@@ -155,10 +159,10 @@ export function enrichPayments(
             }
             const group = product.produto_id && productGroups.find(g => g.id == products.find(p => p.id == product.produto_id)?.grupo_id)
             data.push({
-                'Data': sale.cadastrado_em.split(' ')?.[0],
+                'Data': date.split(' ')?.[0],
                 'Loja': sale.nome_loja,
-                'Ano': sale.cadastrado_em.split('-')[0],
-                'Mês': sale.cadastrado_em.split('-')[1],
+                'Ano': date.split('-')[0],
+                'Mês': date.split('-')[1],
                 'Usuário': seller ? seller.nome : sale.vendedor_id,
                 'Valor total': productTotal,
                 'Quantidade': product.quantidade,
@@ -189,16 +193,16 @@ export function enrichPayments(
             })
             for (const seller of sellers) {
                 data.push({
-                    'Data': sale.cadastrado_em.split(' ')?.[0],
+                    'Data': date.split(' ')?.[0],
                     'Loja': sale.nome_loja,
-                    'Ano': sale.cadastrado_em.split('-')[0],
-                    'Mês': sale.cadastrado_em.split('-')[1],
+                    'Ano': date.split('-')[0],
+                    'Mês': date.split('-')[1],
                     'Usuário': seller,
                     'Valor total': serviceTotal / sellers.length,
                     'Quantidade': 1,
                     'Item': service.nome_servico,
                     'Tipo de item': 'Serviço',
-                    'Fonte': 'Serviço',
+                    'Fonte': 'Ordem de serviço',
                     'ID da Fonte': sale.codigo,
                     'Produto': '',
                     'Técnico': sale.tecnico_id,
