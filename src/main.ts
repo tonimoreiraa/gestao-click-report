@@ -30,7 +30,6 @@ async function main() {
         const sales = await getSales(stores)
         const users = await getUsers()
 
-
         // Handle empty data
         if (payments.length === 0) {
             console.warn('No payments found. Check API access and try again.');
@@ -48,12 +47,51 @@ async function main() {
         await exporter.exportJson(
             enrichedPayments,
             process.env.SPREADSHEET_ID as string,
-            'VENDAS COM FINANCEIRO',
+            'Vendas',
             headers,
         );
 
-        // Generate report
-        generateReport(enrichedPayments);
+        await exporter.exportJson(
+            serviceOrders,
+            process.env.SPREADSHEET_ID as string,
+            'OS',
+            Object.keys(serviceOrders[0]),
+        );
+
+        await exporter.exportJson(
+            payments,
+            process.env.SPREADSHEET_ID as string,
+            'Financeiro',
+            Object.keys(payments[0]),
+        );
+
+        await exporter.exportJson(
+            stores,
+            process.env.SPREADSHEET_ID as string,
+            'Lojas',
+            Object.keys(stores[0]),
+        );
+
+        await exporter.exportJson(
+            products,
+            process.env.SPREADSHEET_ID as string,
+            'Produtos',
+            Object.keys(products[0]),
+        );
+
+        await exporter.exportJson(
+            productGroups,
+            process.env.SPREADSHEET_ID as string,
+            'GruposProdutos',
+            Object.keys(productGroups[0]),
+        );
+
+        await exporter.exportJson(
+            users,
+            process.env.SPREADSHEET_ID as string,
+            'Usuarios',
+            Object.keys(users[0]),
+        );
 
         console.log('Processing completed successfully!');
     } catch (error) {
