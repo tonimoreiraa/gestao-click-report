@@ -1,0 +1,3 @@
+
+*/30 * * * * cd /app/dist && /usr/local/bin/node main.js >> /var/log/cron.log 2>&1
+SHELL=/bin/sh
