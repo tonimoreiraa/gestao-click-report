@@ -55,6 +55,7 @@ export function enrichPayments(
         && !(sale.pagamentos && sale.pagamentos[0] && sale.pagamentos[0].pagamento.nome_forma_pagamento == 'A Combinar')
         && allowedIDs.includes(`sale-${sale.codigo}`)
     })
+    console.log(sales.find(sale => sale.codigo == '14301'))
     
     
     serviceOrders = serviceOrders.filter(os => {
