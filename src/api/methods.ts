@@ -40,19 +40,13 @@ export async function getPayments(stores: Store[]): Promise<Payment[]> {
   const today = new Date().toISOString().split('T')[0]
 
   try {
-    const filePath = 'payments.json';
-    if (loadFromCache && existsSync(filePath) && await isFileNewerThanOneDay(filePath)) {
-      const fileContent = await fs.readFile(filePath, 'utf-8');
-      return JSON.parse(fileContent);
-    }
-
     let payments: Payment[] = []
     for (const store of stores) {
+      const receipts = await fetchAllPages<Payment>(`/recebimentos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
       const storePayments = await fetchAllPages<Payment>(`/recebimentos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
-      payments = [...payments, ...storePayments];
+      
+      payments = [...payments, ...receipts, ...storePayments];
     }
-
-    await fs.writeFile(filePath, JSON.stringify(payments, null, 2));
     console.log(`Successfully loaded ${payments.length} payments`);
     return payments;
   } catch (error) {
@@ -60,6 +54,7 @@ export async function getPayments(stores: Store[]): Promise<Payment[]> {
     return [];
   }
 }
+
 /**
  * Load all product groups from the API
  */
