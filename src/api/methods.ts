@@ -43,7 +43,7 @@ export async function getPayments(stores: Store[]): Promise<Payment[]> {
     let payments: Payment[] = []
     for (const store of stores) {
       const receipts = await fetchAllPages<Payment>(`/recebimentos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
-      const storePayments = await fetchAllPages<Payment>(`/recebimentos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
+      const storePayments = await fetchAllPages<Payment>(`/pagamentos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
       
       payments = [...payments, ...receipts, ...storePayments];
     }

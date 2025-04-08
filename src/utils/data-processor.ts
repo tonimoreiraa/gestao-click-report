@@ -77,6 +77,7 @@ export function enrichPayments(
         }
 
         const seller = users.find(user => user.id == sale.vendedor_id) as User
+        const technician = users.find(user => user.id == sale.tecnico_id) as User
 
         // Produtos de uma venda
         for (const row of sale.produtos ?? []) {
@@ -91,7 +92,7 @@ export function enrichPayments(
                 'Loja': sale.nome_loja,
                 'Ano': date.split('-')[0],
                 'Mês': date.split('-')[1],
-                'Usuário': seller ? seller.nome : sale.vendedor_id,
+                'Usuário': seller ? `${seller.nome} (${seller.id})` : sale.vendedor_id,
                 'Valor total': productTotal,
                 'Quantidade': product.quantidade,
                 'Item': group ? group.nome : 'Sem grupo',
@@ -99,7 +100,7 @@ export function enrichPayments(
                 'Fonte': 'Venda de produto',
                 'ID da Fonte': sale.codigo,
                 'Produto': product.nome_produto,
-                'Técnico': sale.tecnico_id,
+                'Técnico': `${technician?.nome} (${technician?.id})`,
                 'Data de entrada': '', // data entrada nao tem pq nao é OS
                 'Forma de pagametno': sale.pagamentos.map((p: any) => p.pagamento.nome_forma_pagamento).join(', ')
             })
@@ -133,7 +134,7 @@ export function enrichPayments(
                     'Fonte': 'Venda de produto',
                     'ID da Fonte': sale.codigo,
                     'Produto': '',
-                    'Técnico': sale.tecnico_id,
+                    'Técnico': `${technician?.nome} (${technician?.id})`,
                     'Data de entrada': '', // data entrada nao tem pq nao é OS
                     'Forma de pagametno': sale.pagamentos.map((p: any) => p.pagamento.nome_forma_pagamento).join(', ')
                 })
@@ -149,6 +150,7 @@ export function enrichPayments(
         }
 
         const seller = users.find(user => user.id == sale.vendedor_id) as User
+        const technician = users.find(user => user.id == sale.tecnico_id) as User
 
         // Produtos de uma venda
         for (const row of sale.produtos ?? []) {
@@ -163,7 +165,7 @@ export function enrichPayments(
                 'Loja': sale.nome_loja,
                 'Ano': date.split('-')[0],
                 'Mês': date.split('-')[1],
-                'Usuário': seller ? seller.nome : sale.vendedor_id,
+                'Usuário': seller ? `${seller.nome} (${seller.id})` : sale.vendedor_id,
                 'Valor total': productTotal,
                 'Quantidade': product.quantidade,
                 'Item': group ? group.nome : 'Sem grupo',
@@ -171,7 +173,7 @@ export function enrichPayments(
                 'Fonte': 'Ordem de serviço',
                 'ID da Fonte': sale.codigo,
                 'Produto': product.nome_produto,
-                'Técnico': sale.tecnico_id,
+                'Técnico': `${technician?.nome} (${technician?.id})`,
                 'Data de entrada': '',
                 'Forma de pagametno': sale.pagamentos.map((p: any) => p.pagamento.nome_forma_pagamento).join(', ')
             })
@@ -205,7 +207,7 @@ export function enrichPayments(
                     'Fonte': 'Ordem de serviço',
                     'ID da Fonte': sale.codigo,
                     'Produto': '',
-                    'Técnico': sale.tecnico_id,
+                    'Técnico': `${technician?.nome} (${technician?.id})`,
                     'Data de entrada': sale.data_entrada,
                     'Forma de pagametno': sale.pagamentos.map((p: any) => p.pagamento.nome_forma_pagamento).join(', ')
                 })
