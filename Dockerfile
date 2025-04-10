@@ -1,28 +1,38 @@
-FROM node:22
-WORKDIR /app
+# Imagem base Node.js
+FROM node:20-alpine
 
-# Copiar arquivos de dependências primeiro
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
-
-# Instalar pnpm globalmente
+# Instalação do pnpm
 RUN npm install -g pnpm
 
-# Instalar dependências
+# Instalação do cron
+RUN apk add --no-cache dcron
+
+# Criação de diretório para a aplicação
+WORKDIR /app
+
+# Copiar package.json e pnpm-lock.yaml (se existir)
+COPY package*.json pnpm-lock.yaml* ./
+
+# Instalação de dependências
 RUN pnpm install
 
-# Copiar o restante dos arquivos do projeto
+# Copiar código fonte
 COPY . .
 
-# Executar build
-RUN pnpm run build
+# Compilar TypeScript
+RUN pnpm build
 
-# Configurar cron
-RUN apt-get update && apt-get install -y cron
-COPY crontab /etc/cron.d/mycron
-RUN chmod 0644 /etc/cron.d/mycron
-RUN crontab /etc/cron.d/mycron
+# Configurar o cron job
+RUN echo "0 * * * * cd /app && node dist/index.js >> /var/log/cron.log 2>&1" > /etc/crontabs/root
+
+# Arquivo para logs
 RUN touch /var/log/cron.log
 
-# Iniciar cron e manter o container rodando
-CMD cron && tail -f /var/log/cron.log
+# Criar script de inicialização
+RUN echo "#!/bin/sh" > /start.sh && \
+    echo "crond -b -l 8" >> /start.sh && \
+    echo "tail -f /var/log/cron.log" >> /start.sh && \
+    chmod +x /start.sh
+
+# Comando para iniciar o cron e manter o container rodando
+CMD ["/start.sh"]
