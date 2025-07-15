@@ -23,7 +23,7 @@ COPY . .
 RUN pnpm build
 
 # Configurar o cron job
-RUN echo "0 * * * * cd /app && node dist/main.js >> /var/log/cron.log 2>&1" > /etc/crontabs/root
+RUN echo "0 8,12,16,20,0 * * * cd /app && node dist/main.js >> /var/log/cron.log 2>&1" > /etc/crontabs/root
 
 # Arquivo para logs
 RUN touch /var/log/cron.log
