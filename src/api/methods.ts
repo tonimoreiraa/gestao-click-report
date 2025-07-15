@@ -42,8 +42,8 @@ export async function getPayments(stores: Store[]): Promise<Payment[]> {
   try {
     let payments: Payment[] = []
     for (const store of stores) {
-      const receipts = await fetchAllPages<Payment>(`/recebimentos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
-      const storePayments = await fetchAllPages<Payment>(`/pagamentos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
+      const receipts = await fetchAllPages<Payment>(`/recebimentos?data_inicio=2024-01-01&data_fim=${today}&loja_id=${store.id}`);
+      const storePayments = await fetchAllPages<Payment>(`/pagamentos?data_inicio=2024-01-01&data_fim=${today}&loja_id=${store.id}`);
       
       payments = [...payments, ...receipts, ...storePayments];
     }
@@ -140,7 +140,7 @@ export async function getServiceOrders(stores: Store[]): Promise<ServiceOrder[]>
 
     let serviceOrders: ServiceOrder[] = []
     for (const store of stores) {
-      let currentStoreOS = await fetchAllPages<ServiceOrder>(`/ordens_servicos?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}&situacao_id=${situacaoId}`);
+      let currentStoreOS = await fetchAllPages<ServiceOrder>(`/ordens_servicos?data_inicio=2024-01-01&data_fim=${today}&loja_id=${store.id}&situacao_id=${situacaoId}`);
       serviceOrders = [...serviceOrders, ...currentStoreOS]
     }
 
@@ -171,8 +171,8 @@ export async function getSales(stores: Store[]): Promise<Sale[]> {
     const today = new Date().toISOString().split('T')[0]
 
     for (const store of stores) {
-      const normalSales = await fetchAllPages<Sale>(`/vendas?data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`);
-      const counterSales = await fetchAllPages<Sale>(`/vendas?tipo=vendas_balcao&data_inicio=2023-01-01&data_fim=${today}&loja_id=${store.id}`)
+      const normalSales = await fetchAllPages<Sale>(`/vendas?data_inicio=2024-01-01&data_fim=${today}&loja_id=${store.id}`);
+      const counterSales = await fetchAllPages<Sale>(`/vendas?tipo=vendas_balcao&data_inicio=2024-01-01&data_fim=${today}&loja_id=${store.id}`)
       sales = [...sales, ...normalSales, ...counterSales];
     }
 
