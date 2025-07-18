@@ -47,7 +47,7 @@ async function main() {
         await exporter.exportJson(
             enrichedPayments,
             process.env.SPREADSHEET_ID as string,
-            'Vendas',
+            'Vendas API',
             headers,
         );
 
@@ -61,7 +61,7 @@ async function main() {
         await exporter.exportJson(
             payments,
             process.env.SPREADSHEET_ID as string,
-            'Financeiro',
+            'Financeiro API',
             Object.keys(payments[0]),
         );
 
