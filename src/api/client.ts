@@ -68,7 +68,7 @@ export async function fetchAllPages<T>(
             return response as ApiResponse<T>;
         } catch (error: any) {
             console.error(`Error accessing ${url}: ${error instanceof Error ? error.message : String(error)}`);
-            console.log(error.response.data)
+            console.log(error.response?.data)
 
             if (remainingRetries > 0) {
                 console.log(`Retrying in ${delayBetweenRetries / 1000} seconds. ${remainingRetries} attempts remaining.`);
